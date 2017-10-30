@@ -6,18 +6,18 @@ import {
   IColumn
 } from "office-ui-fabric-react/lib/DetailsList";
 
-export class IFactoryMethodState {
-  public type: string;
-  public status: string;
-  public columns: IColumn[];
-  public DetailsListItemState: IDetailsListItemState;
-  public DetailsNewsListItemState: IDetailsNewsListItemState;
-  public DetailsDirectoryListItemState : IDetailsDirectoryListItemState;
-  public DetailsAnnouncementListItemState : IDetailsAnnouncementListItemState;
+export interface IFactoryMethodState {
+  type: string;
+  status: string;
+  columns: IColumn[];
+  DetailsListItemState: IDetailsListItemState;
+  DetailsNewsListItemState: IDetailsNewsListItemState;
+  DetailsDirectoryListItemState : IDetailsDirectoryListItemState;
+  DetailsAnnouncementListItemState : IDetailsAnnouncementListItemState;
 }
 
-export class IDetailsListItemState {
-  public items: IListItem[];
+export interface IDetailsListItemState {
+  items: IListItem[];
 }
 
 export interface IDetailsNewsListItemState {
