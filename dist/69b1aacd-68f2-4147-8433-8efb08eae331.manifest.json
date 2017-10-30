@@ -1,0 +1,24 @@
+{
+  "id": "69b1aacd-68f2-4147-8433-8efb08eae331",
+  "componentType": "Library",
+  "version": "0.0.1",
+  "manifestVersion": 2,
+  "alias": "spdataaccess",
+  "loaderConfig": {
+    "entryModuleId": "spdataaccess",
+    "internalModuleBaseUrls": [
+      "https://localhost:4321/"
+    ],
+    "scriptResources": {
+      "spdataaccess": {
+        "type": "path",
+        "path": "dist/spdataaccess.js"
+      },
+      "@microsoft/sp-http": {
+        "type": "component",
+        "version": "1.2.0",
+        "id": "c07208f0-ea3b-4c1a-9965-ac1b825211a6"
+      }
+    }
+  }
+}

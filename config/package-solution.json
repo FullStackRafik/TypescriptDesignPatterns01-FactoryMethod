@@ -1,0 +1,12 @@
+{
+  "$schema": "https://dev.office.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "typescript-design-patterns-in-sp-fx-client-side-solution",
+    "id": "978df96c-8239-4dc1-be76-a10997e47756",
+    "version": "1.0.0.0",
+    "skipFeatureDeployment": false
+  },
+  "paths": {
+    "zippedPackage": "solution/typescript-design-patterns-in-sp-fx.sppkg"
+  }
+}
