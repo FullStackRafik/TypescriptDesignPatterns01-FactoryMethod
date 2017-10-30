@@ -1,0 +1,8 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "version": "1.2.0",
+    "libraryName": "typescript-design-patterns-in-sp-fx",
+    "libraryId": "978df96c-8239-4dc1-be76-a10997e47756",
+    "environment": "spo"
+  }
+}
