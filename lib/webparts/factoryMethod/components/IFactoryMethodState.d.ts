@@ -3,7 +3,7 @@ import { INewsListItem } from "./models/INewsListItem";
 import { IDirectoryListItem } from "./models/IDirectoryListItem";
 import { IAnnouncementListItem } from "./models/IAnnouncementListItem";
 import { IColumn } from "office-ui-fabric-react/lib/DetailsList";
-export declare class IFactoryMethodState {
+export interface IFactoryMethodState {
     type: string;
     status: string;
     columns: IColumn[];
@@ -12,7 +12,7 @@ export declare class IFactoryMethodState {
     DetailsDirectoryListItemState: IDetailsDirectoryListItemState;
     DetailsAnnouncementListItemState: IDetailsAnnouncementListItemState;
 }
-export declare class IDetailsListItemState {
+export interface IDetailsListItemState {
     items: IListItem[];
 }
 export interface IDetailsNewsListItemState {

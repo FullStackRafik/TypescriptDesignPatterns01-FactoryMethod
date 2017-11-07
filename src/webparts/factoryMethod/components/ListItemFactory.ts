@@ -13,7 +13,7 @@ export class ListItemFactory implements IFactory {
             case "GenericList":
                 let items: IListItem[];
                 // tslint:disable-next-line:max-line-length
-                requester.get(`${siteUrl}/_api/web/lists/getbytitle('${listName}')/items?$select=Title,Id,Modified,Created,Created By,Modified By`,
+                requester.get(`${siteUrl}/_api/web/lists/getbytitle('${listName}')/items?$select=Title,Id,Modified,Created,Author/Title,Editor/Title&$expand=Author,Editor`,
                 SPHttpClient.configurations.v1,
                 {
                     headers: {
