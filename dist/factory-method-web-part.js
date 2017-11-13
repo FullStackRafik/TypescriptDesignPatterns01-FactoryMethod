@@ -4277,13 +4277,13 @@ var FactoryMethod = (function (_super) {
         // set timers using setTimeout or setInterval,
         // or send AJAX requests, perform those operations in this method.
         this._configureWebPart = this._configureWebPart.bind(this);
-        this.readItemsAndSetStatus();
+        this.readItemsAndSetStatus("");
     };
     //#endregion
     //#region Props changes lifecycle events (after a property changes from parent component)
     FactoryMethod.prototype.componentWillReceiveProps = function (nextProps) {
         if (nextProps.listName !== this.props.listName) {
-            this.readItemsAndSetStatus();
+            this.readItemsAndSetStatus(nextProps.listName);
         }
     };
     //#endregion
@@ -4313,15 +4313,15 @@ var FactoryMethod = (function (_super) {
         };
     };
     // read items using factory method pattern and sets state accordingly
-    FactoryMethod.prototype.readItemsAndSetStatus = function () {
+    FactoryMethod.prototype.readItemsAndSetStatus = function (nextListName) {
         var _this = this;
         this.setState({
             status: "Loading all items..."
         });
         var factory = new ListItemFactory_1.ListItemFactory();
-        factory.getItems(this.props.spHttpClient, this.props.siteUrl, this.props.listName)
+        factory.getItems(this.props.spHttpClient, this.props.siteUrl, nextListName)
             .then(function (items) {
-            var keyPart = _this.props.listName === "GenericList" ? "" : _this.props.listName;
+            var keyPart = _this.props.listName === "GenericList" ? "" : nextListName;
             // the explicit specification of the type argument `keyof {}` is bad and
             // it should not be required.
             _this.setState((_a = {
@@ -4485,12 +4485,14 @@ var ListItemFactory = (function () {
     function ListItemFactory() {
     }
     ListItemFactory.prototype.getItems = function (requester, siteUrl, listName) {
-        var _this = this;
+        if (listName === "") {
+            listName = "GenericList";
+        }
         switch (listName) {
             case "GenericList":
-                var items = void 0;
+                var items_1;
                 // tslint:disable-next-line:max-line-length
-                requester.get(siteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$select=Title,Id,Modified,Created,Author/Title,Editor/Title&$expand=Author,Editor", sp_http_1.SPHttpClient.configurations.v1, {
+                return requester.get(siteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$select=Title,Id,Modified,Created,Author/Title,Editor/Title&$expand=Author,Editor", sp_http_1.SPHttpClient.configurations.v1, {
                     headers: {
                         "Accept": "application/json;odata=nometadata",
                         "odata-version": ""
@@ -4500,13 +4502,21 @@ var ListItemFactory = (function () {
                     return response.json();
                 })
                     .then(function (json) {
-                    return _this._listItems = json.value;
+                    console.log(JSON.stringify(json.value));
+                    return items_1 = json.value.map(function (v, i) { return ({
+                        //key: v.id,
+                        id: v.Id,
+                        title: v.Title,
+                        created: v.Created,
+                        createdby: v.Author.Title,
+                        modified: v.Modified,
+                        modifiedby: v.Editor.Title
+                    }); });
                 });
-                break;
             case "News":
                 var newsitems = void 0;
                 // tslint:disable-next-line:max-line-length
-                requester.get(siteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$select=Title,Id,Modified,Created,Created By,Modified By,newsheader,newsbody,expiryDate", sp_http_1.SPHttpClient.configurations.v1, {
+                return requester.get(siteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$select=Title,Id,Modified,Created,Created By,Modified By,newsheader,newsbody,expiryDate", sp_http_1.SPHttpClient.configurations.v1, {
                     headers: {
                         "Accept": "application/json;odata=nometadata",
                         "odata-version": ""
@@ -4516,12 +4526,21 @@ var ListItemFactory = (function () {
                     return response.json();
                 })
                     .then(function (json) {
-                    return _this._listItems = json.value;
+                    return items_1 = json.value.map(function (v, i) { return ({
+                        id: v.Id,
+                        title: v.Title,
+                        created: v.Created,
+                        createdby: v.Author.Title,
+                        modified: v.Modified,
+                        modifiedby: v.Editor.Title,
+                        newsheader: v.newsheader,
+                        newsbody: v.newsbody,
+                        expiryDate: v.expiryDate
+                    }); });
                 });
-                break;
             case "Announcements":
                 var announcementitems = void 0;
-                requester.get(siteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$select=Title,Id", sp_http_1.SPHttpClient.configurations.v1, {
+                return requester.get(siteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$select=Title,Id", sp_http_1.SPHttpClient.configurations.v1, {
                     headers: {
                         "Accept": "application/json;odata=nometadata",
                         "odata-version": ""
@@ -4531,12 +4550,20 @@ var ListItemFactory = (function () {
                     return response.json();
                 })
                     .then(function (json) {
-                    return _this._listItems = json.value;
+                    return items_1 = json.value.map(function (v, i) { return ({
+                        id: v.Id,
+                        title: v.Title,
+                        created: v.Created,
+                        createdby: v.Author.Title,
+                        modified: v.Modified,
+                        modifiedby: v.Editor.Title,
+                        announcementBody: v.announcementBody,
+                        expiryDate: v.expiryDate
+                    }); });
                 });
-                break;
             case "Directory":
                 var directoryitems = void 0;
-                requester.get(siteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$select=Title,Id", sp_http_1.SPHttpClient.configurations.v1, {
+                return requester.get(siteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$select=Title,Id", sp_http_1.SPHttpClient.configurations.v1, {
                     headers: {
                         "Accept": "application/json;odata=nometadata",
                         "odata-version": ""
@@ -4546,11 +4573,42 @@ var ListItemFactory = (function () {
                     return response.json();
                 })
                     .then(function (json) {
-                    return _this._listItems = json.value;
+                    return items_1 = json.value.map(function (v, i) { return ({
+                        id: v.Id,
+                        title: v.Title,
+                        created: v.Created,
+                        createdby: v.Author.Title,
+                        modified: v.Modified,
+                        modifiedby: v.Editor.Title,
+                        firstName: v.firstName,
+                        lastName: v.lastName,
+                        mobileNumber: v.mobileNumber,
+                        internalNumber: v.internalNumber
+                    }); });
                 });
-                break;
             default:
-                return null;
+                // tslint:disable-next-line:max-line-length
+                return requester.get(siteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$select=Title,Id,Modified,Created,Author/Title,Editor/Title&$expand=Author,Editor", sp_http_1.SPHttpClient.configurations.v1, {
+                    headers: {
+                        "Accept": "application/json;odata=nometadata",
+                        "odata-version": ""
+                    }
+                })
+                    .then(function (response) {
+                    return response.json();
+                })
+                    .then(function (json) {
+                    console.log(JSON.stringify(json.value));
+                    return items_1 = json.value.map(function (v, i) { return ({
+                        //key: v.id,
+                        id: v.Id,
+                        title: v.Title,
+                        created: v.Created,
+                        createdby: v.Author.Title,
+                        modified: v.Modified,
+                        modifiedby: v.Editor.Title
+                    }); });
+                });
         }
     };
     return ListItemFactory;

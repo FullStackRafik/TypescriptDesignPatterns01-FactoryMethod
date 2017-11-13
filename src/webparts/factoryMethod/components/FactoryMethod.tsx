@@ -74,7 +74,7 @@ export default class FactoryMethod extends React.Component<IFactoryMethodProps, 
     // set timers using setTimeout or setInterval,
     // or send AJAX requests, perform those operations in this method.
     this._configureWebPart = this._configureWebPart.bind(this);
-    this.readItemsAndSetStatus();
+    this.readItemsAndSetStatus("");
   }
 
   //#endregion
@@ -82,7 +82,7 @@ export default class FactoryMethod extends React.Component<IFactoryMethodProps, 
   //#region Props changes lifecycle events (after a property changes from parent component)
   public componentWillReceiveProps(nextProps: IFactoryMethodProps): void {
     if(nextProps.listName !== this.props.listName) {
-      this.readItemsAndSetStatus();
+      this.readItemsAndSetStatus(nextProps.listName);
     }
   }
 
@@ -130,15 +130,15 @@ export default class FactoryMethod extends React.Component<IFactoryMethodProps, 
   )
 
   // read items using factory method pattern and sets state accordingly
-  private readItemsAndSetStatus(): void {
+  private readItemsAndSetStatus(nextListName: string): void {
     this.setState({
       status: "Loading all items..."
     });
 
     const factory: ListItemFactory = new ListItemFactory();
-    factory.getItems(this.props.spHttpClient, this.props.siteUrl, this.props.listName)
-    .then((items: IListItem[]) => {
-      const keyPart: string = this.props.listName === "GenericList" ? "" : this.props.listName;
+    factory.getItems(this.props.spHttpClient, this.props.siteUrl, nextListName)
+    .then((items: any[]) => {
+      const keyPart: string = this.props.listName === "GenericList" ? "" : nextListName;
         // the explicit specification of the type argument `keyof {}` is bad and
         // it should not be required.
         this.setState<keyof {}>({

@@ -9,6 +9,6 @@ export default class FactoryMethod extends React.Component<IFactoryMethodProps, 
     private _configureWebPart();
     setInitialState(): void;
     private ListMarqueeSelection;
-    private readItemsAndSetStatus();
+    private readItemsAndSetStatus(nextListName);
     private listNotConfigured(props);
 }
