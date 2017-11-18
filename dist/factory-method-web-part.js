@@ -4251,39 +4251,62 @@ var FactoryMethod = (function (_super) {
     // react diff the return value from the previous call to render with
     // the new one, and generate a minimal set of changes to be applied to the DOM.
     FactoryMethod.prototype.render = function () {
-        switch (this.props.listName) {
-            case "GenericList":
-                // tslint:disable-next-line:max-line-length
-                return React.createElement(this.ListMarqueeSelection, { items: this.state.DetailsListItemState.items, columns: this.state.columns });
-            case "News":
-                // tslint:disable-next-line:max-line-length
-                return React.createElement(this.ListMarqueeSelection, { items: this.state.DetailsNewsListItemState.items, columns: this.state.columns });
-            case "Announcements":
-                // tslint:disable-next-line:max-line-length
-                return React.createElement(this.ListMarqueeSelection, { items: this.state.DetailsAnnouncementListItemState.items, columns: this.state.columns });
-            case "Directory":
-                // tslint:disable-next-line:max-line-length
-                return React.createElement(this.ListMarqueeSelection, { items: this.state.DetailsDirectoryListItemState.items, columns: this.state.columns });
-            default:
-                return null;
+        if (this.state.hasError) {
+            // you can render any custom fallback UI
+            return React.createElement("h1", null, "Something went wrong.");
+        }
+        else {
+            switch (this.props.listName) {
+                case "GenericList":
+                    // tslint:disable-next-line:max-line-length
+                    return React.createElement(this.ListMarqueeSelection, { items: this.state.DetailsGenericListItemState.items, columns: this.state.columns });
+                case "News":
+                    // tslint:disable-next-line:max-line-length
+                    return React.createElement(this.ListMarqueeSelection, { items: this.state.DetailsNewsListItemState.items, columns: this.state.columns });
+                case "Announcements":
+                    // tslint:disable-next-line:max-line-length
+                    return React.createElement(this.ListMarqueeSelection, { items: this.state.DetailsAnnouncementListItemState.items, columns: this.state.columns });
+                case "Directory":
+                    // tslint:disable-next-line:max-line-length
+                    return React.createElement(this.ListMarqueeSelection, { items: this.state.DetailsDirectoryListItemState.items, columns: this.state.columns });
+                default:
+                    return null;
+            }
         }
     };
-    // invoked once, only on the client (not on the server), immediately AFTER the initial rendering occurs.
+    FactoryMethod.prototype.componentDidCatch = function (error, info) {
+        // display fallback UI
+        this.setState({ hasError: true });
+        // you can also log the error to an error reporting service
+        console.log(error);
+        console.log(info);
+    };
+    // componentDidMount() is invoked immediately after a component is mounted. Initialization that requires DOM nodes should go here.
+    // if you need to load data from a remote endpoint, this is a good place to instantiate the network request.
+    // this method is a good place to set up any subscriptions. If you do that, don’t forget to unsubscribe in componentWillUnmount().
+    // calling setState() in this method will trigger an extra rendering, but it is guaranteed to flush during the same tick.
+    // this guarantees that even though the render() will be called twice in this case, the user won’t see the intermediate state.
+    // use this pattern with caution because it often causes performance issues. It can, however, be necessary for cases like modals and
+    // tooltips when you need to measure a DOM node before rendering something that depends on its size or position.
     FactoryMethod.prototype.componentDidMount = function () {
-        // you can access any refs to your children
-        // (e.g., to access the underlying DOM representation - ReactDOM.findDOMNode).
-        // the componentDidMount() method of child components is invoked before that of parent components.
-        // if you want to integrate with other JavaScript frameworks,
-        // set timers using setTimeout or setInterval,
-        // or send AJAX requests, perform those operations in this method.
         this._configureWebPart = this._configureWebPart.bind(this);
-        this.readItemsAndSetStatus("");
+        this.readItemsAndSetStatus();
     };
     //#endregion
     //#region Props changes lifecycle events (after a property changes from parent component)
+    // componentWillReceiveProps() is invoked before a mounted component receives new props.
+    // if you need to update the state in response to prop
+    // changes (for example, to reset it), you may compare this.props and nextProps and perform state transitions
+    // using this.setState() in this method.
+    // note that React may call this method even if the props have not changed, so make sure to compare the current
+    // and next values if you only want to handle changes.
+    // this may occur when the parent component causes your component to re-render.
+    // react doesn’t call componentWillReceiveProps() with initial props during mounting. It only calls this
+    // method if some of component’s props may update
+    // calling this.setState() generally doesn’t trigger componentWillReceiveProps()
     FactoryMethod.prototype.componentWillReceiveProps = function (nextProps) {
         if (nextProps.listName !== this.props.listName) {
-            this.readItemsAndSetStatus(nextProps.listName);
+            this.readItemsAndSetStatus();
         }
     };
     //#endregion
@@ -4293,12 +4316,12 @@ var FactoryMethod = (function (_super) {
     };
     FactoryMethod.prototype.setInitialState = function () {
         this.state = {
-            type: "ListItem",
+            hasError: false,
             status: this.listNotConfigured(this.props)
                 ? "Please configure list in Web Part properties"
                 : "Ready",
             columns: [],
-            DetailsListItemState: {
+            DetailsGenericListItemState: {
                 items: []
             },
             DetailsNewsListItemState: {
@@ -4313,24 +4336,39 @@ var FactoryMethod = (function (_super) {
         };
     };
     // read items using factory method pattern and sets state accordingly
-    FactoryMethod.prototype.readItemsAndSetStatus = function (nextListName) {
+    FactoryMethod.prototype.readItemsAndSetStatus = function () {
         var _this = this;
         this.setState({
             status: "Loading all items..."
         });
         var factory = new ListItemFactory_1.ListItemFactory();
-        factory.getItems(this.props.spHttpClient, this.props.siteUrl, nextListName)
+        factory.getItems(this.props.spHttpClient, this.props.siteUrl, this.props.listName)
             .then(function (items) {
-            var keyPart = _this.props.listName === "GenericList" ? "" : nextListName;
+            var myItems = null;
+            switch (_this.props.listName) {
+                case "GenericList":
+                    myItems = items;
+                    break;
+                case "News":
+                    myItems = items;
+                    break;
+                case "Announcements":
+                    myItems = items;
+                    break;
+                case "Directory":
+                    myItems = items;
+                    break;
+            }
+            var keyPart = _this.props.listName === "GenericList" ? "" : _this.props.listName;
             // the explicit specification of the type argument `keyof {}` is bad and
             // it should not be required.
             _this.setState((_a = {
                     status: "Successfully loaded " + items.length + " items"
                 },
                 _a["Details" + keyPart + "ListItemState"] = {
-                    items: items
+                    myItems: myItems
                 },
-                _a.columns = DetailsList_1.buildColumns(items),
+                _a.columns = DetailsList_1.buildColumns(myItems),
                 _a));
             var _a;
         });
@@ -4484,10 +4522,8 @@ var sp_http_1 = __webpack_require__(55);
 var ListItemFactory = (function () {
     function ListItemFactory() {
     }
+    // private _listItems: IListItem[];
     ListItemFactory.prototype.getItems = function (requester, siteUrl, listName) {
-        if (listName === "") {
-            listName = "GenericList";
-        }
         switch (listName) {
             case "GenericList":
                 var items_1;
@@ -4504,7 +4540,7 @@ var ListItemFactory = (function () {
                     .then(function (json) {
                     console.log(JSON.stringify(json.value));
                     return items_1 = json.value.map(function (v, i) { return ({
-                        //key: v.id,
+                        // key: v.id,
                         id: v.Id,
                         title: v.Title,
                         created: v.Created,
@@ -4514,7 +4550,7 @@ var ListItemFactory = (function () {
                     }); });
                 });
             case "News":
-                var newsitems = void 0;
+                var newsitems_1;
                 // tslint:disable-next-line:max-line-length
                 return requester.get(siteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$select=Title,Id,Modified,Created,Created By,Modified By,newsheader,newsbody,expiryDate", sp_http_1.SPHttpClient.configurations.v1, {
                     headers: {
@@ -4526,7 +4562,7 @@ var ListItemFactory = (function () {
                     return response.json();
                 })
                     .then(function (json) {
-                    return items_1 = json.value.map(function (v, i) { return ({
+                    return newsitems_1 = json.value.map(function (v, i) { return ({
                         id: v.Id,
                         title: v.Title,
                         created: v.Created,
@@ -4539,7 +4575,7 @@ var ListItemFactory = (function () {
                     }); });
                 });
             case "Announcements":
-                var announcementitems = void 0;
+                var announcementitems_1;
                 return requester.get(siteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$select=Title,Id", sp_http_1.SPHttpClient.configurations.v1, {
                     headers: {
                         "Accept": "application/json;odata=nometadata",
@@ -4550,7 +4586,7 @@ var ListItemFactory = (function () {
                     return response.json();
                 })
                     .then(function (json) {
-                    return items_1 = json.value.map(function (v, i) { return ({
+                    return announcementitems_1 = json.value.map(function (v, i) { return ({
                         id: v.Id,
                         title: v.Title,
                         created: v.Created,
@@ -4562,7 +4598,7 @@ var ListItemFactory = (function () {
                     }); });
                 });
             case "Directory":
-                var directoryitems = void 0;
+                var directoryitems_1;
                 return requester.get(siteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$select=Title,Id", sp_http_1.SPHttpClient.configurations.v1, {
                     headers: {
                         "Accept": "application/json;odata=nometadata",
@@ -4573,7 +4609,7 @@ var ListItemFactory = (function () {
                     return response.json();
                 })
                     .then(function (json) {
-                    return items_1 = json.value.map(function (v, i) { return ({
+                    return directoryitems_1 = json.value.map(function (v, i) { return ({
                         id: v.Id,
                         title: v.Title,
                         created: v.Created,
@@ -4587,28 +4623,7 @@ var ListItemFactory = (function () {
                     }); });
                 });
             default:
-                // tslint:disable-next-line:max-line-length
-                return requester.get(siteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$select=Title,Id,Modified,Created,Author/Title,Editor/Title&$expand=Author,Editor", sp_http_1.SPHttpClient.configurations.v1, {
-                    headers: {
-                        "Accept": "application/json;odata=nometadata",
-                        "odata-version": ""
-                    }
-                })
-                    .then(function (response) {
-                    return response.json();
-                })
-                    .then(function (json) {
-                    console.log(JSON.stringify(json.value));
-                    return items_1 = json.value.map(function (v, i) { return ({
-                        //key: v.id,
-                        id: v.Id,
-                        title: v.Title,
-                        created: v.Created,
-                        createdby: v.Author.Title,
-                        modified: v.Modified,
-                        modifiedby: v.Editor.Title
-                    }); });
-                });
+                break;
         }
     };
     return ListItemFactory;

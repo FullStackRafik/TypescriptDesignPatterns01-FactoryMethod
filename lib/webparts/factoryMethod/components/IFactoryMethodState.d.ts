@@ -4,15 +4,15 @@ import { IDirectoryListItem } from "./models/IDirectoryListItem";
 import { IAnnouncementListItem } from "./models/IAnnouncementListItem";
 import { IColumn } from "office-ui-fabric-react/lib/DetailsList";
 export interface IFactoryMethodState {
-    type: string;
+    hasError: boolean;
     status: string;
     columns: IColumn[];
-    DetailsListItemState: IDetailsListItemState;
+    DetailsGenericListItemState: IDetailsGenericListItemState;
     DetailsNewsListItemState: IDetailsNewsListItemState;
     DetailsDirectoryListItemState: IDetailsDirectoryListItemState;
     DetailsAnnouncementListItemState: IDetailsAnnouncementListItemState;
 }
-export interface IDetailsListItemState {
+export interface IDetailsGenericListItemState {
     items: IListItem[];
 }
 export interface IDetailsNewsListItemState {

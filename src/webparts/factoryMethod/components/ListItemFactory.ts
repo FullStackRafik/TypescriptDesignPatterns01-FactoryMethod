@@ -7,11 +7,8 @@ import { IDirectoryListItem } from "./models/IDirectoryListItem";
 import { IAnnouncementListItem } from "./models/IAnnouncementListItem";
 
 export class ListItemFactory implements IFactory {
-    private _listItems: IListItem[];
-    public getItems(requester: SPHttpClient, siteUrl: string, listName: string): Promise<IListItem[]> {
-        if(listName === ""){
-            listName = "GenericList";
-        }
+    // private _listItems: IListItem[];
+    public getItems(requester: SPHttpClient, siteUrl: string, listName: string): Promise<any[]> {
         switch(listName) {
             case "GenericList":
                 let items: IListItem[];
@@ -25,22 +22,22 @@ export class ListItemFactory implements IFactory {
                     }
                 })
                 .then((response: SPHttpClientResponse): Promise<{ value: IListItem[] }> => {
-                    return response.json(); 
+                    return response.json();
                 })
                 .then((json: { value: IListItem[] }) => {
                     console.log(JSON.stringify(json.value));
                     return items=json.value.map((v,i)=>(
-                        { 
-                            //key: v.id,
+                        {
+                            // key: v.id,
                             id: v.Id,
                             title: v.Title,
                             created: v.Created,
                             createdby: v.Author.Title,
                             modified: v.Modified,
-                            modifiedby: v.Editor.Title                        
+                            modifiedby: v.Editor.Title
                         }
                     ));
-                });  
+                });
             case "News":
                 let newsitems: INewsListItem[];
                 // tslint:disable-next-line:max-line-length
@@ -56,7 +53,7 @@ export class ListItemFactory implements IFactory {
                     return response.json();
                 })
                 .then((json: { value: INewsListItem[] }) => {
-                    return items=json.value.map((v,i)=>(
+                    return newsitems=json.value.map((v,i)=>(
                         { 
                             id: v.Id,
                             title: v.Title,
@@ -84,7 +81,7 @@ export class ListItemFactory implements IFactory {
                     return response.json();
                 })
                 .then((json: { value: IAnnouncementListItem[] }) => {
-                    return items=json.value.map((v,i)=>(
+                    return announcementitems=json.value.map((v,i)=>(
                         { 
                             id: v.Id,
                             title: v.Title,
@@ -111,8 +108,8 @@ export class ListItemFactory implements IFactory {
                     return response.json();
                 })
                 .then((json: { value: IDirectoryListItem[] }) => {
-                    return items=json.value.map((v,i)=>(
-                        { 
+                    return directoryitems=json.value.map((v,i)=>(
+                        {
                             id: v.Id,
                             title: v.Title,
                             created: v.Created,
@@ -127,32 +124,7 @@ export class ListItemFactory implements IFactory {
                     ));
                 });
             default:
-            // tslint:disable-next-line:max-line-length
-                return requester.get(`${siteUrl}/_api/web/lists/getbytitle('${listName}')/items?$select=Title,Id,Modified,Created,Author/Title,Editor/Title&$expand=Author,Editor`,
-                SPHttpClient.configurations.v1,
-                {
-                    headers: {
-                        "Accept": "application/json;odata=nometadata",
-                        "odata-version": ""
-                    }
-                })
-                .then((response: SPHttpClientResponse): Promise<{ value: IListItem[] }> => {
-                    return response.json(); 
-                })
-                .then((json: { value: IListItem[] }) => {
-                    console.log(JSON.stringify(json.value));
-                    return items=json.value.map((v,i)=>(
-                        { 
-                            //key: v.id,
-                            id: v.Id,
-                            title: v.Title,
-                            created: v.Created,
-                            createdby: v.Author.Title,
-                            modified: v.Modified,
-                            modifiedby: v.Editor.Title                        
-                        }
-                    ));
-                }); 
+                break;
             }
       }
 }
